@@ -1,40 +1,35 @@
 <html>
     <head>
-        <title>Where can we meet ?</title>
+        <title>Pouvons-nous nous rencontrer ?</title>
         
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
               integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
               crossorigin=""/>
-        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
         <link rel="stylesheet" href="./index.css" />
 
         <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     </head>
     <body>
-        <main>
+        <div class="main container-fluid">
             <div class="row">
-                <div class="points col s12 m4">
-                    <p>Entrez au moins 2 adresses</p>
+                <div class="locations col-12 col-md-4">
                     <form>
-                        <div>
-                            <div class="input-field">
-                                <input id="point-1" type="text" placeholder="Point 1">
-                            </div>
-                            <div class="input-field">
-                                <input id="point-2" type="text" placeholder="Point 2">
-                            </div>
+                        <div class="input-group">
+                            <input id="location-1" type="text" class="form-control input-location" placeholder="Localisation 1">
+                        </div>
+                        <div class="input-field">
+                            <input id="location-2" type="text" class="form-control input-location" placeholder="Localisation 2">
                         </div>
                     </form>
                 </div>
-                <div class="map col s12 m8">
+                <div class="map col-12 col-md-8">
                     <div id="map"></div>
                 </div>
             </div>
         </main>
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.37.1/autocomplete.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
         <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
                 integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
                 crossorigin=""></script>
@@ -43,36 +38,11 @@
             L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
                 attribution: '&copy; ESRI contributors'
             }).addTo(map);
-
             var featureGroup = L.featureGroup([]).addTo(map);
 
-            /*
-            var markerA = L.marker([46.76667, 0.43333]).addTo(featureGroup);
-            var circleA = L.circle([46.76667, 0.43333], {
-                color: 'red',
-                fillColor: 'red',
-                fillOpacity: 0.25,
-                radius: 100000
-            }).addTo(featureGroup);
+            var locations = {}
 
-            var markerB = L.marker([47.2776410, -2.4794220]).addTo(featureGroup);
-            var circleB = L.circle([47.2776410, -2.4794220], {
-                color: 'blue',
-                fillColor: 'blue',
-                fillOpacity: 0.25,
-                radius: 100000
-            }).addTo(featureGroup);
-
-            var markerC = L.marker([47.2933369,0.347606]).addTo(featureGroup);
-            var circleC = L.circle([47.2933369,0.347606], {
-                color: 'green',
-                fillColor: 'green',
-                fillOpacity: 0.25,
-                radius: 100000
-            }).addTo(featureGroup);
-            */
-
-            autocomplete('#point-1', { hint: false }, [
+            autocomplete('#location-1', { hint: false }, [
                 {
                     source: function(query, callback) {
                         fetch('https://api-adresse.data.gouv.fr/search/?q=' + query + '&limit=10')
@@ -102,20 +72,31 @@
                     }
                 }
             ]).on('autocomplete:selected', function(event, suggestion, dataset, context) {
-                console.log(suggestion);
-                var latitudeA = suggestion.geometry.coordinates[1]
-                var longitudeA = suggestion.geometry.coordinates[0]
-                var markerA = L.marker([latitudeA, longitudeA]).addTo(featureGroup);
-                var circleA = L.circle([latitudeA, longitudeA], {
+                var latitude1 = suggestion.geometry.coordinates[1];
+                var longitude1 = suggestion.geometry.coordinates[0];
+                var marker1 = L.marker([latitude1, longitude1]);
+                var circle1 = L.circle([latitude1, longitude1], {
                     color: 'red',
                     fillColor: 'red',
                     fillOpacity: 0.25,
                     radius: 100000
-                }).addTo(featureGroup);
+                });
+                locations["location-1"] = {
+                    "marker": marker1,
+                    "circle": circle1
+                };
+                
+                featureGroup.remove();
+                featureGroup = L.featureGroup([]).addTo(map);
+                Object.keys(locations).forEach(function(locationKey) {
+                    var location = locations[locationKey];
+                    location.marker.addTo(featureGroup);
+                    location.circle.addTo(featureGroup);
+                })
                 map.fitBounds(featureGroup.getBounds());
             });
 
-            autocomplete('#point-2', { hint: false }, [
+            autocomplete('#location-2', { hint: false }, [
                 {
                     source: function(query, callback) {
                         fetch('https://api-adresse.data.gouv.fr/search/?q=' + query + '&limit=10')
@@ -145,15 +126,27 @@
                     }
                 }
             ]).on('autocomplete:selected', function(event, suggestion, dataset, context) {
-                var latitudeB = suggestion.geometry.coordinates[1]
-                var longitudeB = suggestion.geometry.coordinates[0]
-                var markerA = L.marker([latitudeB, longitudeB]).addTo(featureGroup);
-                var circleA = L.circle([latitudeB, longitudeB], {
+                var latitude2 = suggestion.geometry.coordinates[1];
+                var longitude2 = suggestion.geometry.coordinates[0];
+                var marker2 = L.marker([latitude2, longitude2]);
+                var circle2 = L.circle([latitude2, longitude2], {
                     color: 'blue',
                     fillColor: 'blue',
                     fillOpacity: 0.25,
                     radius: 100000
-                }).addTo(featureGroup);
+                });
+                locations["location-2"] = {
+                    "marker": marker2,
+                    "circle": circle2
+                };
+                
+                featureGroup.remove();
+                featureGroup = L.featureGroup([]).addTo(map);
+                Object.keys(locations).forEach(function(locationKey) {
+                    var location = locations[locationKey];
+                    location.marker.addTo(featureGroup);
+                    location.circle.addTo(featureGroup);
+                })
                 map.fitBounds(featureGroup.getBounds());
             });
 
