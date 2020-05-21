@@ -41,6 +41,102 @@
             var featureGroup = L.featureGroup([]).addTo(map);
 
             var locations = {}
+            var callbackLocation1 = function(event, suggestion, dataset, context) {
+                    var latitude1 = suggestion.geometry.coordinates[1];
+                    var longitude1 = suggestion.geometry.coordinates[0];
+                    var marker1 = L.marker([latitude1, longitude1]);
+                    var circle1 = L.circle([latitude1, longitude1], {
+                        color: 'red',
+                        fillColor: 'red',
+                        fillOpacity: 0.25,
+                        radius: 100000
+                    });
+                    locations["location-1"] = {
+                        "marker": marker1,
+                        "circle": circle1
+                    };
+                    
+                    featureGroup.remove();
+                    featureGroup = L.featureGroup([]).addTo(map);
+                    Object.keys(locations).forEach(function(locationKey) {
+                        var location = locations[locationKey];
+                        location.marker.addTo(featureGroup);
+                        location.circle.addTo(featureGroup);
+                    })
+                    map.fitBounds(featureGroup.getBounds());
+
+                    var url = new URL(window.location.href);
+                    url.searchParams.set('location-1', suggestion.properties.label);
+                    history.pushState({}, '', url)
+                }
+            
+            var callbackLocation2 = function(event, suggestion, dataset, context) {
+                var latitude2 = suggestion.geometry.coordinates[1];
+                var longitude2 = suggestion.geometry.coordinates[0];
+                var marker2 = L.marker([latitude2, longitude2]);
+                var circle2 = L.circle([latitude2, longitude2], {
+                    color: 'blue',
+                    fillColor: 'blue',
+                    fillOpacity: 0.25,
+                    radius: 100000
+                });
+                locations["location-2"] = {
+                    "marker": marker2,
+                    "circle": circle2
+                };
+                
+                featureGroup.remove();
+                featureGroup = L.featureGroup([]).addTo(map);
+                Object.keys(locations).forEach(function(locationKey) {
+                    var location = locations[locationKey];
+                    location.marker.addTo(featureGroup);
+                    location.circle.addTo(featureGroup);
+                })
+                map.fitBounds(featureGroup.getBounds());
+
+                var url = new URL(window.location.href);
+                url.searchParams.set('location-2', suggestion.properties.label);
+                history.pushState({}, '', url)
+            }
+            
+            var url = new URL(window.location.href);
+            location1URLParameter = url.searchParams.get('location-1');
+            if(location1URLParameter){
+                fetch('https://api-adresse.data.gouv.fr/search/?q=' + location1URLParameter + '&limit=1')
+                    .then(function(response) {
+                        return response.json();
+                    })
+                    .then(function(json){
+                        if(json.features.length > 0){
+                            var item = json.features[0];
+                            callbackLocation1({},item,{},{});
+                            if (item.properties.type === 'municipality') {
+                                document.getElementById("location-1").value = item.properties.label + ' (' + item.properties.postcode + ')';
+                            } else {
+                                document.getElementById("location-1").value = item.properties.label;
+                            }
+                        }
+                    })
+            }
+            location2URLParameter = url.searchParams.get('location-2');
+            if(location2URLParameter){
+                fetch('https://api-adresse.data.gouv.fr/search/?q=' + location2URLParameter + '&limit=1')
+                    .then(function(response) {
+                        return response.json();
+                    })
+                    .then(function(json){
+                        if(json.features.length > 0){
+                            var item = json.features[0];
+                            callbackLocation2({},item,{},{});
+                            if (item.properties.type === 'municipality') {
+                                document.getElementById("location-2").value = item.properties.label + ' (' + item.properties.postcode + ')';
+                            } else {
+                                document.getElementById("location-2").value = item.properties.label;
+                            }
+                        }
+                    })
+            }
+
 
             autocomplete('#location-1', { hint: false }, [
                 {
@@ -71,30 +167,7 @@
                         empty: `<div class="aa-suggestion aa-suggestion-empty">Aucune correspondance...</div>`
                     }
                 }
-            ]).on('autocomplete:selected', function(event, suggestion, dataset, context) {
-                var latitude1 = suggestion.geometry.coordinates[1];
-                var longitude1 = suggestion.geometry.coordinates[0];
-                var marker1 = L.marker([latitude1, longitude1]);
-                var circle1 = L.circle([latitude1, longitude1], {
-                    color: 'red',
-                    fillColor: 'red',
-                    fillOpacity: 0.25,
-                    radius: 100000
-                });
-                locations["location-1"] = {
-                    "marker": marker1,
-                    "circle": circle1
-                };
-                
-                featureGroup.remove();
-                featureGroup = L.featureGroup([]).addTo(map);
-                Object.keys(locations).forEach(function(locationKey) {
-                    var location = locations[locationKey];
-                    location.marker.addTo(featureGroup);
-                    location.circle.addTo(featureGroup);
-                })
-                map.fitBounds(featureGroup.getBounds());
-            });
+            ]).on('autocomplete:selected', callbackLocation1);
 
             autocomplete('#location-2', { hint: false }, [
                 {
@@ -125,31 +198,8 @@
                         empty: `<div class="aa-suggestion aa-suggestion-empty">Aucune correspondance...</div>`
                     }
                 }
-            ]).on('autocomplete:selected', function(event, suggestion, dataset, context) {
-                var latitude2 = suggestion.geometry.coordinates[1];
-                var longitude2 = suggestion.geometry.coordinates[0];
-                var marker2 = L.marker([latitude2, longitude2]);
-                var circle2 = L.circle([latitude2, longitude2], {
-                    color: 'blue',
-                    fillColor: 'blue',
-                    fillOpacity: 0.25,
-                    radius: 100000
-                });
-                locations["location-2"] = {
-                    "marker": marker2,
-                    "circle": circle2
-                };
-                
-                featureGroup.remove();
-                featureGroup = L.featureGroup([]).addTo(map);
-                Object.keys(locations).forEach(function(locationKey) {
-                    var location = locations[locationKey];
-                    location.marker.addTo(featureGroup);
-                    location.circle.addTo(featureGroup);
-                })
-                map.fitBounds(featureGroup.getBounds());
-            });
-
+            ]).on('autocomplete:selected', callbackLocation2);
+           
         </script>
     </body>
 </html>
