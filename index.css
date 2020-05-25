@@ -61,7 +61,7 @@ h1 {
     text-align: center;
     margin-bottom: 30px;
     font-weight: 700;
-    font-size: 1.8rem;
+    font-size: 1.2rem;
 }
 @media screen and (min-width: 768px) {
     h1 {
@@ -75,11 +75,18 @@ h1 {
 }
 
 .presentation {
-    margin-bottom: 40px;
+    margin-top: 40px;
     border-top: 1px solid #ffffff;
     border-bottom: 1px solid #ffffff;
     padding: 20px 0 20px 0;
     font-weight: 300;
+    display: none;
+}
+
+@media screen and (min-width: 768px) {
+    .presentation {
+        display: block;
+    }
 }
 
 h2 {
