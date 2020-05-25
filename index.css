@@ -1,17 +1,134 @@
-#map {
-    height: 100vh;
+body {
+    font-family: 'Roboto Condensed', sans-serif;
+    color: #ffffff;
 }
 
 .main {
-    margin-top: 16px;
+    background: #45a2cc;
+    display: flex;
+    flex-direction: column;
 }
+@media screen and (min-width: 768px) {
+    .main {
+        display: flex;
+        flex-direction: row;
+    }
+}
+
+p {
+    font-size: 1.0rem;
+    line-height: 1.2rem;
+}
+@media screen and (min-width: 768px) {
+    p {
+        font-size: 1.1rem;
+        line-height: 1.3rem;
+    }
+}
+@media screen and (min-width: 992px) {
+    p {
+        font-size: 1.3rem;
+        line-height: 1.5rem;
+    }
+}
+
+/* Locations */
 
 .locations {
     z-index: 10000;
+    width: 100%;
+}
+
+@media screen and (min-width: 768px) {
+    .locations {
+        width: 45%;
+        height: 100vh;
+        overflow-y: auto;
+    }
+}
+@media screen and (min-width: 992px) {
+    .locations {
+        width: 35%;
+    }
+}
+
+.location__container {
+    padding: 30px;
+}
+
+h1 {
+    text-transform: uppercase;
+    text-align: center;
+    margin-bottom: 30px;
+    font-weight: 700;
+    font-size: 1.8rem;
+}
+@media screen and (min-width: 768px) {
+    h1 {
+        font-size: 2.0rem;
+    }
+}
+@media screen and (min-width: 992px) {
+    h1 {
+        font-size: 2.4rem;
+    }
+}
+
+.presentation {
+    margin-bottom: 40px;
+    border-top: 1px solid #ffffff;
+    border-bottom: 1px solid #ffffff;
+    padding: 20px 0 20px 0;
+    font-weight: 300;
+}
+
+h2 {
+    margin-bottom: 30px;
+    font-size: 1.6rem;
+}
+@media screen and (min-width: 768px) {
+    h2 {
+        font-size: 1.8rem;
+    }
+}
+@media screen and (min-width: 992px) {
+    h2 {
+        font-size: 1.8rem;
+    }
+}
+
+h2 i {
+    margin-right: 10px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    font-size: 1.2rem;
+}
+label i {
+    margin-right: 10px;
+}
+
+.form-control {
+    height: 45px;
+    border-radius: 80px;
+    font-size: 1.2rem;
+    color: #45a2cc;
+}
+
+.form-control:focus {
+    color: #35738f;
 }
 
 .input-location {
     margin-bottom: 5px;
+}
+
+.form-control::placeholder {
+    color: #adb7bc;
 }
 
 .algolia-autocomplete {
@@ -32,6 +149,7 @@
     background-color: #fff;
     border: 1px solid #999;
     border-top: none;
+    color: #35738f;
 }
 
 .algolia-autocomplete .aa-dropdown-menu .aa-suggestion {
@@ -46,4 +164,29 @@
 .algolia-autocomplete .aa-dropdown-menu .aa-suggestion em {
     font-weight: bold;
     font-style: normal;
+}
+
+/* Map */
+
+.map {
+    width: 100%;
+}
+@media screen and (min-width: 768px) {
+    .map {
+        width: 55%;
+    }
+}
+@media screen and (min-width: 992px) {
+    .map {
+        width: 65%;
+    }
+}
+
+#map {
+    height: 60vh;
+}
+@media screen and (min-width: 768px) {
+    #map {
+        height: 100vh;
+    }
 }
