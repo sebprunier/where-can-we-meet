@@ -28,8 +28,16 @@
                                 <input id="location-1" type="text" class="form-control input-location" placeholder="Renseignez votre localisation">
                             </div>
                             <div class="form-group input-field">
-                                <label><i class="fas fa-map-marker-alt"></i>Localisation de mon proche</label>
+                                <label><i class="fas fa-map-marker-alt"></i>Localisation de mon proche #1</label>
                                 <input id="location-2" type="text" class="form-control input-location" placeholder="Renseignez la localisation de votre proche">
+                            </div>
+                            <div class="form-group input-field">
+                                <label><i class="fas fa-map-marker-alt"></i>Localisation de mon proche #2</label>
+                                <input id="location-3" type="text" class="form-control input-location" placeholder="Renseignez la localisation de votre proche">
+                            </div>
+                            <div class="form-group input-field">
+                                <label><i class="fas fa-map-marker-alt"></i>Localisation de mon proche #3</label>
+                                <input id="location-4" type="text" class="form-control input-location" placeholder="Renseignez la localisation de votre proche">
                             </div>
                         </form>
                     </div>
@@ -56,48 +64,27 @@
             var featureGroup = L.featureGroup([]).addTo(map);
 
             var locations = {}
-            var callbackLocation1 = function(event, suggestion, dataset, context) {
-                    var latitude1 = suggestion.geometry.coordinates[1];
-                    var longitude1 = suggestion.geometry.coordinates[0];
-                    var marker1 = L.marker([latitude1, longitude1]);
-                    var circle1 = L.circle([latitude1, longitude1], {
-                        color: '#45a2cc',
-                        fillColor: '#45a2cc',
-                        fillOpacity: 0.25,
-                        radius: 100000
-                    });
-                    locations["location-1"] = {
-                        "marker": marker1,
-                        "circle": circle1
-                    };
-                    
-                    featureGroup.remove();
-                    featureGroup = L.featureGroup([]).addTo(map);
-                    Object.keys(locations).forEach(function(locationKey) {
-                        var location = locations[locationKey];
-                        location.marker.addTo(featureGroup);
-                        location.circle.addTo(featureGroup);
-                    })
-                    map.fitBounds(featureGroup.getBounds());
 
-                    var url = new URL(window.location.href);
-                    url.searchParams.set('location-1', suggestion.properties.label);
-                    history.pushState({}, '', url)
-                }
-            
-            var callbackLocation2 = function(event, suggestion, dataset, context) {
-                var latitude2 = suggestion.geometry.coordinates[1];
-                var longitude2 = suggestion.geometry.coordinates[0];
-                var marker2 = L.marker([latitude2, longitude2]);
-                var circle2 = L.circle([latitude2, longitude2], {
-                    color: '#35738f',
-                    fillColor: '#35738f',
+            var locationNamesAndColors = {
+                "location-1" : "#45a2cc",
+                "location-2" : "#3F92B7",
+                "location-3" : "#3A82A3",
+                "location-4" : "#35738f"
+            }
+
+            var callbackLocation = function(event, suggestion, dataset, context, locationName){
+                var latitude = suggestion.geometry.coordinates[1];
+                var longitude = suggestion.geometry.coordinates[0];
+                var marker1 = L.marker([latitude, longitude]);
+                var circle1 = L.circle([latitude, longitude], {
+                    color: locationNamesAndColors[locationName],
+                    fillColor: locationNamesAndColors[locationName],
                     fillOpacity: 0.25,
                     radius: 100000
                 });
-                locations["location-2"] = {
-                    "marker": marker2,
-                    "circle": circle2
+                locations[locationName] = {
+                    "marker": marker1,
+                    "circle": circle1
                 };
                 
                 featureGroup.remove();
@@ -110,111 +97,69 @@
                 map.fitBounds(featureGroup.getBounds());
 
                 var url = new URL(window.location.href);
-                url.searchParams.set('location-2', suggestion.properties.label);
-                history.pushState({}, '', url)
+                url.searchParams.set(locationName, suggestion.properties.label);
+                history.pushState({}, '', url);
+            }
+
+
+            var createLocationLabel = function(item){
+                if (item.properties.type === 'municipality') {
+                    return item.properties.label + ' (' + item.properties.postcode + ')'
+                } else {
+                    return item.properties.label
+                }
             }
             
-            var url = new URL(window.location.href);
-            location1URLParameter = url.searchParams.get('location-1');
-            if(location1URLParameter){
-                fetch('https://api-adresse.data.gouv.fr/search/?q=' + location1URLParameter + '&limit=1')
-                    .then(function(response) {
-                        return response.json();
-                    })
-                    .then(function(json){
-                        if(json.features.length > 0){
-                            var item = json.features[0];
-                            callbackLocation1({},item,{},{});
-                            if (item.properties.type === 'municipality') {
-                                document.getElementById("location-1").value = item.properties.label + ' (' + item.properties.postcode + ')';
-                            } else {
-                                document.getElementById("location-1").value = item.properties.label;
-                            }
+            var setAutocomplete = function(locationLabel){
+                autocomplete('#' + locationLabel, { hint: false }, [
+                    {
+                        source: function(query, callback) {
+                            fetch('https://api-adresse.data.gouv.fr/search/?q=' + query + '&limit=10')
+                                .then(function(res) {
+                                    return res.json()
+                                })
+                                .then(function(response) {
+                                    callback(response.features)
+                                })
+                        },
+                        displayKey: function(item) {
+                            return createLocationLabel(item);
+                        },
+                        templates: {
+                            suggestion: function(item) {
+                                return createLocationLabel(item);
+                            },
+                            empty: `<div class="aa-suggestion aa-suggestion-empty">Aucune correspondance...</div>`
                         }
-                    })
-            }
-            location2URLParameter = url.searchParams.get('location-2');
-            if(location2URLParameter){
-                fetch('https://api-adresse.data.gouv.fr/search/?q=' + location2URLParameter + '&limit=1')
-                    .then(function(response) {
-                        return response.json();
-                    })
-                    .then(function(json){
-                        if(json.features.length > 0){
-                            var item = json.features[0];
-                            callbackLocation2({},item,{},{});
-                            if (item.properties.type === 'municipality') {
-                                document.getElementById("location-2").value = item.properties.label + ' (' + item.properties.postcode + ')';
-                            } else {
-                                document.getElementById("location-2").value = item.properties.label;
-                            }
-                        }
-                    })
+                    }
+                ]).on('autocomplete:selected', function(event, suggestion, dataset, context){
+                    callbackLocation(event, suggestion, dataset, context, locationLabel);
+                });
             }
 
 
-            autocomplete('#location-1', { hint: false }, [
-                {
-                    source: function(query, callback) {
-                        fetch('https://api-adresse.data.gouv.fr/search/?q=' + query + '&limit=10')
-                            .then(function(res) {
-                                return res.json()
-                            })
-                            .then(function(response) {
-                                callback(response.features)
-                            })
-                    },
-                    displayKey: function(item) {
-                        if (item.properties.type === 'municipality') {
-                            return item.properties.label + ' (' + item.properties.postcode + ')'
-                        } else {
-                            return item.properties.label
-                        }
-                    },
-                    templates: {
-                        suggestion: function(item) {
-                            if (item.properties.type === 'municipality') {
-                                return item.properties.label + ' (' + item.properties.postcode + ')'
-                            } else {
-                                return item.properties.label
-                            }
-                        },
-                        empty: `<div class="aa-suggestion aa-suggestion-empty">Aucune correspondance...</div>`
-                    }
-                }
-            ]).on('autocomplete:selected', callbackLocation1);
+            Object.keys(locationNamesAndColors).forEach(
+                function(locationName){
+                    var url = new URL(window.location.href);
+                    var locationURLParameter = url.searchParams.get(locationName);
 
-            autocomplete('#location-2', { hint: false }, [
-                {
-                    source: function(query, callback) {
-                        fetch('https://api-adresse.data.gouv.fr/search/?q=' + query + '&limit=10')
-                            .then(function(res) {
-                                return res.json()
-                            })
+                    if(locationURLParameter){
+                        fetch('https://api-adresse.data.gouv.fr/search/?q=' + locationURLParameter + '&limit=1')
                             .then(function(response) {
-                                callback(response.features)
+                                return response.json();
                             })
-                    },
-                    displayKey: function(item) {
-                        if (item.properties.type === 'municipality') {
-                            return item.properties.label + ' (' + item.properties.postcode + ')'
-                        } else {
-                            return item.properties.label
-                        }
-                    },
-                    templates: {
-                        suggestion: function(item) {
-                            if (item.properties.type === 'municipality') {
-                                return item.properties.label + ' (' + item.properties.postcode + ')'
-                            } else {
-                                return item.properties.label
-                            }
-                        },
-                        empty: `<div class="aa-suggestion aa-suggestion-empty">Aucune correspondance...</div>`
+                            .then(function(json){
+                                if(json.features.length > 0){
+                                    var item = json.features[0];
+                                    callbackLocation({},item,{},{},locationName);
+                                    document.getElementById(locationName).value = createLocationLabel(item);
+                                }
+                            });
                     }
+                    setAutocomplete(locationName);
                 }
-            ]).on('autocomplete:selected', callbackLocation2);
-           
+            );  
+
         </script>
     </body>
 </html>
