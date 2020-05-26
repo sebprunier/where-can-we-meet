@@ -3,6 +3,10 @@ body {
     color: #ffffff;
 }
 
+.hello {
+    outline: 1px solid red;
+}
+
 .main {
     background: #45a2cc;
     display: flex;
@@ -171,6 +175,55 @@ label i {
 .algolia-autocomplete .aa-dropdown-menu .aa-suggestion em {
     font-weight: bold;
     font-style: normal;
+}
+
+
+.locations__form .more-link {
+    color: #ffffff;
+    font-size: 1.0rem;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+}
+.more:active, .more:focus, .more:visited, .more:hover {
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.more-link i {
+    margin-right: 10px;
+    font-size: 1.5rem;
+}
+
+@media screen and (min-width: 768px) {
+    .more {
+        display: none;
+    }
+}
+
+.more-locations-entry {
+    display: none;
+}
+@media screen and (min-width: 768px) {
+    .more-locations-entry {
+        display: block;
+    }
+}
+
+.show .more-locations-entry{
+    display: block;
+}
+
+.show .more{
+    display: none;
+}
+
+.less {
+    display: none !important;
+}
+
+.show .less{
+    display: inline-block !important;
 }
 
 /* Map */
